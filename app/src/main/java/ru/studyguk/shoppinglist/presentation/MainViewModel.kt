@@ -1,7 +1,6 @@
 package ru.studyguk.shoppinglist.presentation
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ru.studyguk.shoppinglist.data.ShopListRepositoryImpl
 import ru.studyguk.shoppinglist.domain.DeleteShopItemUseCase
@@ -17,21 +16,15 @@ class MainViewModel : ViewModel() {
     private val deleteShopItemUseCase = DeleteShopItemUseCase(repository)
     private val editShopItemUseCase = EditShopItemUseCase(repository)
 
-    private val _shopList = MutableLiveData<List<ShopItem>>()
+    private val _shopList = getShopListUseCase.getShopList()
     val shopList: LiveData<List<ShopItem>> = _shopList
-
-    fun getShopList() {
-        _shopList.value = getShopListUseCase.getShopList()
-    }
 
     fun deleteShopList(shopItem: ShopItem) {
         deleteShopItemUseCase.deleteShopItem(shopItem)
-        getShopList()
     }
 
     fun changeEnableState(shopItem: ShopItem) {
         shopItem.enabled = !shopItem.enabled
         editShopItemUseCase.editShopItem(shopItem)
-        getShopList()
     }
 }
