@@ -19,7 +19,7 @@ class MainViewModel : ViewModel() {
     private val _shopList = getShopListUseCase.getShopList()
     val shopList: LiveData<List<ShopItem>> = _shopList
 
-    fun deleteShopList(shopItem: ShopItem) {
+    fun deleteShopItem(shopItem: ShopItem) {
         deleteShopItemUseCase.deleteShopItem(shopItem)
     }
 
