@@ -4,4 +4,6 @@
     <string name="nameTextHint">Name:</string>
     <string name="textHintCount">Count:</string>
     <string name="saveButtonText">Save</string>
+    <string name="nameErrorText">Name is incorrect</string>
+    <string name="countErrorText">Count is incorrect</string>
 </resources>
