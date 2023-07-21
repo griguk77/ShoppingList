@@ -2,6 +2,7 @@ package ru.studyguk.shoppinglist.presentation
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainer
 import androidx.fragment.app.FragmentContainerView
@@ -9,18 +10,21 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import ru.studyguk.shoppinglist.R
 import ru.studyguk.shoppinglist.presentation.ShopItemActivity.Companion.newIntentEditItem
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var shopListAdapter: ShopListAdapter
     private var shopItemContainer: FragmentContainerView? = null
+    private var constraintLayout: ConstraintLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        constraintLayout = findViewById(R.id.constraintLayout)
         shopItemContainer = findViewById(R.id.shop_item_container)
         setupRecyclerView()
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
@@ -35,6 +39,17 @@ class MainActivity : AppCompatActivity() {
             } else {
                 launchFragment(ShopItemFragment.newInstanceAddItem())
             }
+        }
+    }
+
+    override fun onEditingFinished() {
+        if (constraintLayout != null) {
+            Snackbar.make(
+                constraintLayout!!,
+                "Saved",
+                Snackbar.LENGTH_SHORT
+            ).show()
+            supportFragmentManager.popBackStack()
         }
     }
 

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,8 +30,21 @@ class ShopItemFragment() : Fragment() {
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
 
+    private lateinit var onEditingFinishedListener: OnEditingFinishedListener
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        Log.d("RRR", "onAttach")
+        if (context is OnEditingFinishedListener) {
+            onEditingFinishedListener = context
+        } else {
+            throw RuntimeException("Activity must implement OnEditingFinishedListener")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("RRR", "onCreate")
         parseParams()
     }
 
@@ -39,16 +53,53 @@ class ShopItemFragment() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d("RRR", "onCreateView")
         return inflater.inflate(R.layout.fragment_shop_item, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("RRR", "onViewCreated")
         viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
         initViews(view)
         addTextChangeListeners()
         observeViewModel()
         launchRightMode()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("RRR", "onStart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("RRR", "onResume")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("RRR", "onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("RRR", "onStop")
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.d("RRR", "onDestroyView")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("RRR", "onDestroy")
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        Log.d("RRR", "onDetach")
     }
 
     private fun launchRightMode() {
@@ -74,7 +125,7 @@ class ShopItemFragment() : Fragment() {
             }
         }
         viewModel.shouldCloseScreen.observe(viewLifecycleOwner) {
-            activity?.onBackPressed()
+            onEditingFinishedListener.onEditingFinished()
         }
     }
 
@@ -126,6 +177,10 @@ class ShopItemFragment() : Fragment() {
         etName = view.findViewById(R.id.et_name)
         etCount = view.findViewById(R.id.et_count)
         buttonSave = view.findViewById(R.id.save_button)
+    }
+
+    interface OnEditingFinishedListener {
+        fun onEditingFinished()
     }
 
     private fun parseParams() {
