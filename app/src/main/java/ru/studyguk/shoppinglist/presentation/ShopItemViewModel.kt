@@ -1,16 +1,19 @@
 package ru.studyguk.shoppinglist.presentation
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.studyguk.shoppinglist.data.ShopListRepositoryImpl
 import ru.studyguk.shoppinglist.domain.AddShopItemUseCase
 import ru.studyguk.shoppinglist.domain.EditShopItemUseCase
 import ru.studyguk.shoppinglist.domain.GetShopItemUseCase
 import ru.studyguk.shoppinglist.domain.ShopItem
 
-class ShopItemViewModel : ViewModel() {
-    private val repository = ShopListRepositoryImpl
+class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository = ShopListRepositoryImpl(application)
 
     private val getShopItemUseCase = GetShopItemUseCase(repository)
     private val editShopItemUseCase = EditShopItemUseCase(repository)
@@ -33,8 +36,10 @@ class ShopItemViewModel : ViewModel() {
         get() = _shouldCloseScreen
 
     fun getShopItem(shopItemId: Int) {
-        val item = getShopItemUseCase.getShopItem(shopItemId)
-        _shopItem.value = item
+        viewModelScope.launch {
+            val item = getShopItemUseCase.getShopItem(shopItemId)
+            _shopItem.value = item
+        }
     }
 
     fun addShopItem(inputName: String?, inputCount: String?) {
@@ -42,9 +47,11 @@ class ShopItemViewModel : ViewModel() {
         val count = parseCount(inputCount)
         val fieldsValid = validateInput(name, count)
         if (fieldsValid) {
-            val item = ShopItem(name = name, count = count, enabled = true)
-            addShopItemUseCase.addShopItem(item)
-            finishWork()
+            viewModelScope.launch {
+                val item = ShopItem(name = name, count = count, enabled = true)
+                addShopItemUseCase.addShopItem(item)
+                finishWork()
+            }
         }
     }
 
@@ -54,9 +61,11 @@ class ShopItemViewModel : ViewModel() {
         val fieldsValid = validateInput(name, count)
         if (fieldsValid) {
             _shopItem.value?.let {
-                val shopItem = it.copy(name = name, count = count)
-                editShopItemUseCase.editShopItem(shopItem)
-                finishWork()
+                viewModelScope.launch {
+                    val shopItem = it.copy(name = name, count = count)
+                    editShopItemUseCase.editShopItem(shopItem)
+                    finishWork()
+                }
             }
         }
     }
