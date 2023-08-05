@@ -5,6 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.studyguk.shoppinglist.data.ShopListRepositoryImpl
 import ru.studyguk.shoppinglist.domain.AddShopItemUseCase
 import ru.studyguk.shoppinglist.domain.EditShopItemUseCase
@@ -12,6 +15,8 @@ import ru.studyguk.shoppinglist.domain.GetShopItemUseCase
 import ru.studyguk.shoppinglist.domain.ShopItem
 
 class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     private val repository = ShopListRepositoryImpl(application)
 
@@ -36,8 +41,10 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         get() = _shouldCloseScreen
 
     fun getShopItem(shopItemId: Int) {
-        val item = getShopItemUseCase.getShopItem(shopItemId)
-        _shopItem.value = item
+        scope.launch {
+            val item = getShopItemUseCase.getShopItem(shopItemId)
+            _shopItem.value = item
+        }
     }
 
     fun addShopItem(inputName: String?, inputCount: String?) {
@@ -46,7 +53,9 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         val fieldsValid = validateInput(name, count)
         if (fieldsValid) {
             val item = ShopItem(name = name, count = count, enabled = true)
-            addShopItemUseCase.addShopItem(item)
+            scope.launch {
+                addShopItemUseCase.addShopItem(item)
+            }
             finishWork()
         }
     }
@@ -58,7 +67,9 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         if (fieldsValid) {
             _shopItem.value?.let {
                 val shopItem = it.copy(name = name, count = count)
-                editShopItemUseCase.editShopItem(shopItem)
+                scope.launch {
+                    editShopItemUseCase.editShopItem(shopItem)
+                }
                 finishWork()
             }
         }

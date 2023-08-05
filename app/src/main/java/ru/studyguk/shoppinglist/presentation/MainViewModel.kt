@@ -4,6 +4,10 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import ru.studyguk.shoppinglist.data.ShopListRepositoryImpl
 import ru.studyguk.shoppinglist.domain.DeleteShopItemUseCase
 import ru.studyguk.shoppinglist.domain.EditShopItemUseCase
@@ -11,6 +15,8 @@ import ru.studyguk.shoppinglist.domain.GetShopListUseCase
 import ru.studyguk.shoppinglist.domain.ShopItem
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     private val repository = ShopListRepositoryImpl(application)
 
@@ -22,13 +28,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val shopList: LiveData<List<ShopItem>> = _shopList
 
     fun deleteShopItem(shopItem: ShopItem) {
-        deleteShopItemUseCase.deleteShopItem(shopItem)
+        scope.launch {
+            deleteShopItemUseCase.deleteShopItem(shopItem)
+        }
     }
 
     fun changeEnableState(shopItem: ShopItem) {
-//        shopItem.enabled = !shopItem.enabled
-//        editShopItemUseCase.editShopItem(shopItem)
-        val newItem = shopItem.copy(enabled = !shopItem.enabled)
-        editShopItemUseCase.editShopItem(newItem)
+        scope.launch {
+            val newItem = shopItem.copy(enabled = !shopItem.enabled)
+            editShopItemUseCase.editShopItem(newItem)
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        scope.cancel()
     }
 }
