@@ -1,10 +1,7 @@
 package ru.studyguk.shoppinglist.presentation
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,8 +12,6 @@ import ru.studyguk.shoppinglist.domain.GetShopItemUseCase
 import ru.studyguk.shoppinglist.domain.ShopItem
 
 class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val scope = CoroutineScope(Dispatchers.IO)
 
     private val repository = ShopListRepositoryImpl(application)
 
@@ -41,7 +36,7 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         get() = _shouldCloseScreen
 
     fun getShopItem(shopItemId: Int) {
-        scope.launch {
+        viewModelScope.launch {
             val item = getShopItemUseCase.getShopItem(shopItemId)
             _shopItem.value = item
         }
@@ -52,11 +47,11 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         val count = parseCount(inputCount)
         val fieldsValid = validateInput(name, count)
         if (fieldsValid) {
-            val item = ShopItem(name = name, count = count, enabled = true)
-            scope.launch {
+            viewModelScope.launch {
+                val item = ShopItem(name = name, count = count, enabled = true)
                 addShopItemUseCase.addShopItem(item)
+                finishWork()
             }
-            finishWork()
         }
     }
 
@@ -66,11 +61,11 @@ class ShopItemViewModel(application: Application) : AndroidViewModel(application
         val fieldsValid = validateInput(name, count)
         if (fieldsValid) {
             _shopItem.value?.let {
-                val shopItem = it.copy(name = name, count = count)
-                scope.launch {
+                viewModelScope.launch {
+                    val shopItem = it.copy(name = name, count = count)
                     editShopItemUseCase.editShopItem(shopItem)
+                    finishWork()
                 }
-                finishWork()
             }
         }
     }
